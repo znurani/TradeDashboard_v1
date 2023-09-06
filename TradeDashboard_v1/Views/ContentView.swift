@@ -13,16 +13,22 @@ struct ContentView: View {
     @EnvironmentObject var authenticationManager: AuthenticationManager
     
     var body: some View {
-        NavigationStack{
-         
-            VStack{
-                
-            Text("Open PNL")
-                Text("")
-                
-            }.navigationTitle("Dashboard")
+        
+        TabView{
             
+            AccountsView()
+                .tabItem{
+                    Label("Accounts", systemImage: "house")
+                }
+            
+            AuthenticationView()
+                .badge("!")
+                .tabItem {
+                    Label("Authentication", systemImage:"gear")
+                }
+        
         }
+        
     }
 }
 

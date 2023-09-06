@@ -5,14 +5,7 @@ class AccountManager: ObservableObject {
     
     @Published var accountList: [Account] = []
     private var cancellables = Set<AnyCancellable>()
-    private var requestSemaphore = DispatchSemaphore(value: 3)
-    
-    func delayNextRequest() {
-        requestSemaphore.wait()
-        DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
-            self.requestSemaphore.signal()
-        }
-    }
+
     
     func fetchAccounts(apiServer: String, accessToken: String, completion: @escaping () -> Void) {
         let url = URL(string: "\(apiServer)v1/accounts")!
@@ -183,8 +176,6 @@ class AccountManager: ObservableObject {
             })
             .store(in: &cancellables)
     }
-
-
 
 
     class NetworkManager {

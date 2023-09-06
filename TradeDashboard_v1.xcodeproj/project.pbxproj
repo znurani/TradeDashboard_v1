@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A10F1E962AA6EDF100B02287 /* DataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10F1E952AA6EDF100B02287 /* DataModels.swift */; };
+		A12807BC2AA7D8180050330B /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12807BB2AA7D8180050330B /* DatabaseManager.swift */; };
 		A17B1E712A959FFB00019C50 /* AccountDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17B1E702A959FFB00019C50 /* AccountDetailView.swift */; };
 		A18C5CF12A955A4700EED58D /* TradeDashboard_v1App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A18C5CF02A955A4700EED58D /* TradeDashboard_v1App.swift */; };
 		A18C5CF52A955A4A00EED58D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A18C5CF42A955A4A00EED58D /* Assets.xcassets */; };
@@ -25,6 +26,7 @@
 
 /* Begin PBXFileReference section */
 		A10F1E952AA6EDF100B02287 /* DataModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataModels.swift; sourceTree = "<group>"; };
+		A12807BB2AA7D8180050330B /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
 		A17B1E702A959FFB00019C50 /* AccountDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDetailView.swift; sourceTree = "<group>"; };
 		A18C5CED2A955A4700EED58D /* TradeDashboard_v1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TradeDashboard_v1.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A18C5CF02A955A4700EED58D /* TradeDashboard_v1App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradeDashboard_v1App.swift; sourceTree = "<group>"; };
@@ -52,6 +54,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A12807BA2AA7D5710050330B /* Archive */ = {
+			isa = PBXGroup;
+			children = (
+				A18C5D012A955F0300EED58D /* PieChartView.swift */,
+				A18C5D112A9566C600EED58D /* StockHoldingsView.swift */,
+				A18C5D092A9565A900EED58D /* SettingsView.swift */,
+			);
+			path = Archive;
+			sourceTree = "<group>";
+		};
 		A18C5CE42A955A4700EED58D = {
 			isa = PBXGroup;
 			children = (
@@ -91,14 +103,12 @@
 		A18C5D0B2A9565FA00EED58D /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				A18C5CFF2A955BDE00EED58D /* ContentView.swift */,
 				A18C5D072A95658B00EED58D /* AppTabView.swift */,
-				A18C5D092A9565A900EED58D /* SettingsView.swift */,
+				A18C5CFF2A955BDE00EED58D /* ContentView.swift */,
 				A18C5D0F2A95668E00EED58D /* AuthenticationView.swift */,
 				A18C5D0D2A95667100EED58D /* AccountsView.swift */,
 				A17B1E702A959FFB00019C50 /* AccountDetailView.swift */,
-				A18C5D012A955F0300EED58D /* PieChartView.swift */,
-				A18C5D112A9566C600EED58D /* StockHoldingsView.swift */,
+				A12807BA2AA7D5710050330B /* Archive */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -106,9 +116,10 @@
 		A193A1E72AA555F7009220CF /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				A18C5D032A95606100EED58D /* AuthenticationManager.swift */,
 				A193A1E42AA53D5A009220CF /* AccountManager.swift */,
 				A10F1E952AA6EDF100B02287 /* DataModels.swift */,
-				A18C5D032A95606100EED58D /* AuthenticationManager.swift */,
+				A12807BB2AA7D8180050330B /* DatabaseManager.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -185,6 +196,7 @@
 			files = (
 				A18C5D022A955F0300EED58D /* PieChartView.swift in Sources */,
 				A193A1E52AA53D5A009220CF /* AccountManager.swift in Sources */,
+				A12807BC2AA7D8180050330B /* DatabaseManager.swift in Sources */,
 				A18C5D0E2A95667100EED58D /* AccountsView.swift in Sources */,
 				A18C5D0A2A9565A900EED58D /* SettingsView.swift in Sources */,
 				A18C5D122A9566C600EED58D /* StockHoldingsView.swift in Sources */,

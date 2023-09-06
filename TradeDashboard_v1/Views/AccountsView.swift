@@ -9,8 +9,8 @@ import SwiftUI
 
 struct AccountsView: View {
     
-    @EnvironmentObject var accountManager: AccountManager
     @EnvironmentObject var authenticationManager: AuthenticationManager
+    @EnvironmentObject var accountManager: AccountManager
     
     @State private var searchText: String = ""  // Define searchText
     
@@ -20,40 +20,44 @@ struct AccountsView: View {
                 ForEach(accountManager.accountList, id: \.id) { accountDetail in  // Loop through accountList
                     NavigationLink(destination: AccountDetailView(accountNumber: accountDetail.number)) {
                         VStack(alignment: .leading) {
-                            Text("Account Type: \(accountDetail.type)")  // Correctly access type
+                            Text("Account Type: \(accountDetail.type)") 
                                 .font(.headline)
-                            Text("Account Number: \(accountDetail.number)")  // Correctly access number
+                            Text("Account Number: \(accountDetail.number)")
                                 .font(.headline)
                         }
                     }
                 }
-                .onDelete(perform: removeAccount)  // Moved onDelete here
+                .onDelete(perform: removeAccount)
             }
             .searchable(text: $searchText)
             .navigationTitle("Accounts")
             .navigationBarItems(trailing:
                                     Button(action: {
-                                        accountManager.fetchAccounts(
-                                            apiServer: authenticationManager.apiServer ?? "",
-                                            accessToken: authenticationManager.accessToken ?? "",
-                                            completion: {})
-                                    })
-                                {
-                Image(systemName: "arrow.clockwise")
+                                        fetchAccounts()
+                                    }) {
+                                        Image(systemName: "arrow.clockwise")
+                                    }
+            ).onAppear {
+               
+                    fetchAccounts()
+                
             }
-            )
-        }.onAppear(perform: {
-            accountManager.fetchAccounts(
-                apiServer: authenticationManager.apiServer ?? "",
-                accessToken: authenticationManager.accessToken ?? "",
-                completion: {})
-        })
+        }
     }
     
     func removeAccount(at offsets: IndexSet) {
         accountManager.accountList.remove(atOffsets: offsets)
     }
+    
+    // Extracted the fetching logic to its own function for reusability
+    func fetchAccounts() {
+        accountManager.fetchAccounts(
+            apiServer: authenticationManager.apiServer ?? "",
+            accessToken: authenticationManager.accessToken ?? "",
+            completion: {})
+    }
 }
+
 
 
 #Preview {

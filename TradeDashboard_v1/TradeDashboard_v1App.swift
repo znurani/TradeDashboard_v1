@@ -10,19 +10,17 @@ import SwiftUI
 @main
 struct TradeDashboard_v1App: App {
     
-    @StateObject var accountManager = AccountManager()
     @StateObject var authenticationManager = AuthenticationManager()
+    @StateObject var accountManager = AccountManager()
+
     
     var body: some Scene {
         WindowGroup {
-            
-            AppTabView()
-                .environmentObject(AuthenticationManager())
-                .environmentObject(AccountManager())
-            
-        
+            ContentView()
+                .environmentObject(authenticationManager) 
+                .environmentObject(accountManager)
         }
-        
-     
     }
 }
+
+
