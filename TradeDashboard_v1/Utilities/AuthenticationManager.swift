@@ -58,38 +58,52 @@ class AuthenticationManager: ObservableObject {
     
     // Function to send a POST request for token refresh
     func postRequest() {
+        print("Debug: postRequest() called")  // Debug line
+
         let parameters = [
             "grant_type": "refresh_token",
             "refresh_token": refreshToken
         ]
-        
-        let url = URL(string: "https://login.questrade.com/oauth2/token")!
+
+        guard let url = URL(string: "https://login.questrade.com/oauth2/token") else {
+            print("Debug: Invalid URL")
+            return
+        }
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.httpBody = parameters.map { "\($0.key)=\($0.value)" }.joined(separator: "&").data(using: .utf8)
-        
+
         URLSession.shared.dataTaskPublisher(for: request)
-            // Use tryMap to validate the HTTP response status code
             .tryMap { output in
-                guard let httpResponse = output.response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    throw URLSession.DataTaskPublisher.Failure.self as! Error
+                guard let httpResponse = output.response as? HTTPURLResponse else {
+                    print("Debug: Not an HTTP response")  // Debug line
+                    throw URLError(.badServerResponse)
                 }
+
+                guard httpResponse.statusCode == 200 else {
+                    print("Debug: Bad status code: \(httpResponse.statusCode)")  // Debug line
+                    throw URLError(.badServerResponse)
+                }
+
                 return output.data
             }
-            // Decode the JSON response and update properties on the main queue
             .decode(type: Response.self, decoder: JSONDecoder())
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
                 switch completion {
                 case .failure(let error):
+                    print("Debug: Sink received error: \(error)")  // Debug line
                     self?.tokenValid = false
                     self?.errorOccured = true
                     self?.errorMessage = error.localizedDescription
                 case .finished:
+                    print("Debug: Sink finished successfully")  // Debug line
                     break
                 }
             } receiveValue: { [weak self] response in
+                print("Debug: Received value: \(response)")  // Debug line
                 self?.accessToken = response.access_token
                 self?.apiServer = response.api_server
                 self?.refreshToken = response.refresh_token
@@ -101,6 +115,8 @@ class AuthenticationManager: ObservableObject {
             }
             .store(in: &subscriptions)
     }
+
+
     
     // Function to start the refresh and countdown timers
     private func startTimer() {

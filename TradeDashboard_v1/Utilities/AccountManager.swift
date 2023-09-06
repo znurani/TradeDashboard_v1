@@ -1,119 +1,24 @@
-//
-//  AccountManager.swift
-//  TradeDashboard_v1
-//
-//  Created by Zeshan Nurani on 2023-09-03.
-//  Updated by Zeshan Nurani on 2023-09-0X. 
-//
-//  This code is written in Swift and uses the Combine framework to handle asynchronous tasks. It defines a class AccountManager that fetches account and position data from an API and
-//  stores it in an array of AccountDetails and Position structs.
-//
-
 import Foundation
 import Combine
 
-// AccountManager class that conforms to ObservableObject protocol
 class AccountManager: ObservableObject {
     
-    // Published property that will notify subscribers about changes
-    @Published var accountList: [AccountDetails] = []
-    
-    // Set to store any cancellable instances
+    @Published var accountList: [Account] = []
     private var cancellables = Set<AnyCancellable>()
+    private var requestSemaphore = DispatchSemaphore(value: 3)
     
-    // Struct to hold account details
-    struct AccountDetails: Decodable, Identifiable {
-        var id = UUID()
-        let type: String
-        let number: String
-        let status: String
-        let isPrimary: Bool
-        let isBilling: Bool
-        let clientAccountType: String
-        var positions: [Position]?
-        
-        // CodingKeys enum to map JSON keys to Swift properties
-        enum CodingKeys: String, CodingKey {
-            case type, number, status, isPrimary, isBilling, clientAccountType
-        }
-        
-        // Custom initializer to decode JSON data
-        init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            type = try container.decode(String.self, forKey: .type)
-            number = try container.decode(String.self, forKey: .number)
-            status = try container.decode(String.self, forKey: .status)
-            isPrimary = try container.decode(Bool.self, forKey: .isPrimary)
-            isBilling = try container.decode(Bool.self, forKey: .isBilling)
-            clientAccountType = try container.decode(String.self, forKey: .clientAccountType)
+    func delayNextRequest() {
+        requestSemaphore.wait()
+        DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
+            self.requestSemaphore.signal()
         }
     }
-
-    // Struct to hold position details
-    struct Position: Decodable, Identifiable {
-        
-        var id = UUID()
-        var symbol: String
-        var symbolId: Int
-        var openQuantity: Double
-        var currentMarketValue: Double
-        var currentPrice: Double
-        var averageEntryPrice: Double
-        var closedPnl: Double
-        var openPnl: Double?
-        var totalCost: Double
-        var isRealTime: Bool
-        var isUnderReorg: Bool
-        
-        // CodingKeys enum to map JSON keys to Swift properties
-        enum CodingKeys: String, CodingKey {
-            case symbol, symbolId, openQuantity, currentMarketValue, currentPrice, averageEntryPrice, closedPnl, openPnl, totalCost, isRealTime, isUnderReorg
-        }
-        
-        // Custom initializer to decode JSON data
-        init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            symbol = try container.decode(String.self, forKey: .symbol)
-            symbolId = try container.decode(Int.self, forKey: .symbolId)
-            openQuantity = try container.decode(Double.self, forKey: .openQuantity)
-            currentMarketValue = try container.decode(Double.self, forKey: .currentMarketValue)
-            currentPrice = try container.decode(Double.self, forKey: .currentPrice)
-            averageEntryPrice = try container.decode(Double.self, forKey: .averageEntryPrice)
-            closedPnl = try container.decode(Double.self, forKey: .closedPnl)
-            openPnl = try container.decode(Double.self, forKey: .openPnl)
-            totalCost = try container.decode(Double.self, forKey: .totalCost)
-            isRealTime = try container.decode(Bool.self, forKey: .isRealTime)
-            isUnderReorg = try container.decode(Bool.self, forKey: .isUnderReorg)
-        }
-    }
-
     
-    struct Order {
-        // ... (same as before)
-    }
-    
-    struct Balances {
-        // ... (same as before)
-    }
-    
-    struct AccountsResponse: Decodable {
-        let accounts: [AccountDetails]
-        let userId: Int
-    }
-    
-    
-    // Function to fetch accounts from API
-    func fetchAccounts(apiServer: String, accessToken: String) {
+    func fetchAccounts(apiServer: String, accessToken: String, completion: @escaping () -> Void) {
         let url = URL(string: "\(apiServer)v1/accounts")!
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        let headers = ["Authorization": "Bearer \(accessToken)", "Accept": "application/json"]
         
-        // Using Combine to handle asynchronous network request
-        URLSession.shared.dataTaskPublisher(for: request)
-            .map { $0.data }
-            .decode(type: AccountsResponse.self, decoder: JSONDecoder())
-            .receive(on: DispatchQueue.main)
+        NetworkManager.performRequest(url: url, headers: headers, decodingType: AccountsResponse.self, callingFunction: "Accounts")
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .failure(let error):
@@ -124,24 +29,16 @@ class AccountManager: ObservableObject {
             }, receiveValue: { [weak self] response in
                 print("Received accounts: \(response.accounts.count)")
                 self?.accountList = response.accounts
+                completion()
             })
             .store(in: &cancellables)
     }
     
-    // Function to fetch positions for a specific account from API
     func fetchPositions(apiServer: String, accountId: String, accessToken: String) {
-        
         let url = URL(string: "\(apiServer)v1/accounts/\(accountId)/positions")!
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        let headers = ["Authorization": "Bearer \(accessToken)", "Accept": "application/json"]
         
-        // Using Combine to handle asynchronous network request
-        URLSession.shared.dataTaskPublisher(for: request)
-            .tryMap { data, response in
-                try JSONDecoder().decode([String: [Position]].self, from: data)["positions"] ?? []
-            }
-            .receive(on: DispatchQueue.main)
+        NetworkManager.performRequest(url: url, headers: headers, decodingType: PositionsResponse.self, callingFunction: "Positions")
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .failure(let error):
@@ -149,12 +46,166 @@ class AccountManager: ObservableObject {
                 case .finished:
                     break
                 }
-            }, receiveValue: { [weak self] positions in
+            }, receiveValue: { [weak self] response in
                 if let index = self?.accountList.firstIndex(where: { $0.number == accountId }) {
-                    self?.accountList[index].positions = positions
+                    self?.accountList[index].positions = response.positions
+                    
+                    print("Retrieved Positions for: \(accountId)")
                 }
             })
             .store(in: &cancellables)
     }
+    
+    func fetchBalances(apiServer: String, accountId: String, accessToken: String) {
+        let url = URL(string: "\(apiServer)v1/accounts/\(accountId)/balances")!
+        let headers = ["Authorization": "Bearer \(accessToken)", "Accept": "application/json"]
+        
+        NetworkManager.performRequest(url: url, headers: headers, decodingType: BalancesResponse.self, callingFunction: "Balances")
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .failure(let error):
+                    print("Fetching balances failed: \(error)")
+                case .finished:
+                    break
+                }
+            }, receiveValue: { [weak self] response in
+                var allBalances: [Balance] = []
+                
+                let updateBalancesWithType = { (balances: [Balance], type: Balance.BalanceType) -> [Balance] in
+                    return balances.map {
+                        var balance = $0
+                        balance.type = type
+                        return balance
+                    }
+                }
+                
+                allBalances += updateBalancesWithType(response.perCurrencyBalances, .perCurrency)
+                allBalances += updateBalancesWithType(response.combinedBalances, .combined)
+                allBalances += updateBalancesWithType(response.sodPerCurrencyBalances, .sodPerCurrency)
+                allBalances += updateBalancesWithType(response.sodCombinedBalances, .sodCombined)
+                
+                print("Retrieved Balances for: \(accountId)")
+                
+                if let index = self?.accountList.firstIndex(where: { $0.number == accountId }) {
+                    self?.accountList[index].balances = allBalances
+                }
+            })
+            .store(in: &cancellables)
+    }
+    
+    
+    func fetchExecutions(apiServer: String, accountId: String, accessToken: String) {
+        print("[DEBUG] Starting: fetchExecutions")
+        
+        // Fetch executions based on phone's local time
+        fetchExecutionsBasedOnLocalTime(apiServer: apiServer, accountId: accountId, accessToken: accessToken)
+    }
+
+
+    private func fetchServerTime(apiServer: String, accessToken: String, completion: @escaping (Result<Date, Error>) -> Void) {
+        let url = URL(string: "\(apiServer)v1/time")!
+        let headers = ["Authorization": "Bearer \(accessToken)", "Accept": "application/json"]
+        
+        NetworkManager.performRequest(url: url, headers: headers, decodingType: TimeResponse.self, callingFunction: "fetchServerTime")
+            .sink(receiveCompletion: { _ in }, receiveValue: { timeResponse in
+                print("[DEBUG] Received time string: \(timeResponse.time)")
+                
+                let dateFormatter = ISO8601DateFormatter()
+                dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                
+                if let date = dateFormatter.date(from: timeResponse.time) {
+                    print("[DEBUG] Successfully parsed date: \(date)")
+                    completion(.success(date))
+                } else {
+                    print("[ERROR] Date parsing failed")
+                    completion(.failure(NSError(domain: "", code: 0, userInfo: nil)))
+                }
+            })
+            .store(in: &cancellables)
+    }
+
+    private func fetchExecutionsBasedOnServerTime(apiServer: String, accountId: String, accessToken: String, serverTime: Date) {
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        let startTime = Calendar.current.date(byAdding: .day, value: -7, to: serverTime)!
+        let startTimeString = dateFormatter.string(from: startTime)
+        let endTimeString = dateFormatter.string(from: serverTime)
+        
+        let url = URL(string: "\(apiServer)v1/accounts/\(accountId)/executions?startTime=\(startTimeString)&endTime=\(endTimeString)")!
+        let headers = ["Authorization": "Bearer \(accessToken)", "Accept": "application/json"]
+
+        NetworkManager.performRequest(url: url, headers: headers, decodingType: ExecutionsResponse.self, callingFunction: "fetchExecutionsBasedOnServerTime")
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .failure(let error):
+                    print("[ERROR] Fetching executions failed: \(error)")
+                case .finished:
+                    print("[DEBUG] Finished: fetchExecutions")
+                }
+            }, receiveValue: { [weak self] response in
+                if let index = self?.accountList.firstIndex(where: { $0.number == accountId }) {
+                    self?.accountList[index].executions = response.executions
+                    print("[DEBUG] Updated executions for the last 7 days for: \(accountId)")
+                }
+            })
+            .store(in: &cancellables)
+    }
+    
+    private func fetchExecutionsBasedOnLocalTime(apiServer: String, accountId: String, accessToken: String) {
+        // Get current time from the phone
+        let localTime = Date()
+        
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        // Calculate start and end times
+        let startTime = Calendar.current.date(byAdding: .day, value: -7, to: localTime)!
+        let startTimeString = dateFormatter.string(from: startTime)
+        let endTimeString = dateFormatter.string(from: localTime)
+        
+        let url = URL(string: "\(apiServer)v1/accounts/\(accountId)/executions?startTime=\(startTimeString)&endTime=\(endTimeString)")!
+        let headers = ["Authorization": "Bearer \(accessToken)", "Accept": "application/json"]
+        
+        NetworkManager.performRequest(url: url, headers: headers, decodingType: ExecutionsResponse.self, callingFunction: "fetchExecutionsBasedOnLocalTime")
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .failure(let error):
+                    print("[ERROR] Fetching executions failed: \(error)")
+                case .finished:
+                    print("[DEBUG] Finished: fetchExecutionsBasedOnLocalTime")
+                }
+            }, receiveValue: { [weak self] response in
+                if let index = self?.accountList.firstIndex(where: { $0.number == accountId }) {
+                    self?.accountList[index].executions = response.executions
+                    print("[DEBUG] Updated executions for the last 7 days for: \(accountId)")
+                }
+            })
+            .store(in: &cancellables)
+    }
+
+
+
+
+    class NetworkManager {
+        
+        static func performRequest<T: Decodable>(url: URL, headers: [String: String], decodingType: T.Type, callingFunction: String = "") -> AnyPublisher<T, Error> {
+            var request = URLRequest(url: url)
+            headers.forEach { key, value in
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+            print("Request Sent from \(callingFunction)")
+            
+            return URLSession.shared.dataTaskPublisher(for: request)
+                .map(\.data)
+                .decode(type: T.self, decoder: JSONDecoder())
+                .receive(on: DispatchQueue.main)
+                .eraseToAnyPublisher()
+        }
+    }
+
+    
+    
+    
 }
 

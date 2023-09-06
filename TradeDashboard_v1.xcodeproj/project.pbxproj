@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A10F1E962AA6EDF100B02287 /* DataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10F1E952AA6EDF100B02287 /* DataModels.swift */; };
 		A17B1E712A959FFB00019C50 /* AccountDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A17B1E702A959FFB00019C50 /* AccountDetailView.swift */; };
 		A18C5CF12A955A4700EED58D /* TradeDashboard_v1App.swift in Sources */ = {isa = PBXBuildFile; fileRef = A18C5CF02A955A4700EED58D /* TradeDashboard_v1App.swift */; };
 		A18C5CF52A955A4A00EED58D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A18C5CF42A955A4A00EED58D /* Assets.xcassets */; };
@@ -20,10 +21,10 @@
 		A18C5D102A95668E00EED58D /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A18C5D0F2A95668E00EED58D /* AuthenticationView.swift */; };
 		A18C5D122A9566C600EED58D /* StockHoldingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A18C5D112A9566C600EED58D /* StockHoldingsView.swift */; };
 		A193A1E52AA53D5A009220CF /* AccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A193A1E42AA53D5A009220CF /* AccountManager.swift */; };
-		A193A1E92AA55728009220CF /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A193A1E82AA55728009220CF /* CoreDataManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A10F1E952AA6EDF100B02287 /* DataModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataModels.swift; sourceTree = "<group>"; };
 		A17B1E702A959FFB00019C50 /* AccountDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDetailView.swift; sourceTree = "<group>"; };
 		A18C5CED2A955A4700EED58D /* TradeDashboard_v1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TradeDashboard_v1.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A18C5CF02A955A4700EED58D /* TradeDashboard_v1App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradeDashboard_v1App.swift; sourceTree = "<group>"; };
@@ -38,7 +39,6 @@
 		A18C5D0F2A95668E00EED58D /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
 		A18C5D112A9566C600EED58D /* StockHoldingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockHoldingsView.swift; sourceTree = "<group>"; };
 		A193A1E42AA53D5A009220CF /* AccountManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountManager.swift; sourceTree = "<group>"; };
-		A193A1E82AA55728009220CF /* CoreDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,8 +107,8 @@
 			isa = PBXGroup;
 			children = (
 				A193A1E42AA53D5A009220CF /* AccountManager.swift */,
+				A10F1E952AA6EDF100B02287 /* DataModels.swift */,
 				A18C5D032A95606100EED58D /* AuthenticationManager.swift */,
-				A193A1E82AA55728009220CF /* CoreDataManager.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -189,7 +189,7 @@
 				A18C5D0A2A9565A900EED58D /* SettingsView.swift in Sources */,
 				A18C5D122A9566C600EED58D /* StockHoldingsView.swift in Sources */,
 				A17B1E712A959FFB00019C50 /* AccountDetailView.swift in Sources */,
-				A193A1E92AA55728009220CF /* CoreDataManager.swift in Sources */,
+				A10F1E962AA6EDF100B02287 /* DataModels.swift in Sources */,
 				A18C5D042A95606100EED58D /* AuthenticationManager.swift in Sources */,
 				A18C5D102A95668E00EED58D /* AuthenticationView.swift in Sources */,
 				A18C5D082A95658B00EED58D /* AppTabView.swift in Sources */,
